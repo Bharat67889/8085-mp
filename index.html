@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +15,11 @@
   --muted: #9aafa2;
   --border: #34483b;
 }
-* { box-sizing: border-box; }
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: radial-gradient(circle at top, #25382c, #0b100d 75%);
@@ -24,6 +28,7 @@ body {
   min-height: 100vh;
   padding: 20px 12px;
 }
+
 .app {
   width: 100%;
   max-width: 720px;
@@ -34,19 +39,26 @@ body {
   padding: 20px;
   box-shadow: 0 15px 50px #0009;
 }
-.header { text-align: center; margin-bottom: 20px; }
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
 .header h1 {
   font-size: clamp(20px, 5vw, 29px);
   letter-spacing: 2px;
   margin: 0 0 7px;
   color: #d9f3df;
 }
+
 .header p {
   font-size: 12px;
   color: #91ab98;
   letter-spacing: 2px;
   margin: 0;
 }
+
 .display {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -57,6 +69,7 @@ body {
   border-radius: 10px;
   margin-bottom: 16px;
 }
+
 .display-box {
   background: #140b0b;
   border: 1px solid #48201e;
@@ -65,12 +78,14 @@ body {
   text-align: center;
   min-width: 0;
 }
+
 .display-label {
   font-size: 10px;
   color: #8d706e;
   letter-spacing: 2px;
   margin-bottom: 8px;
 }
+
 .led {
   color: var(--red);
   font-family: "Courier New", monospace;
@@ -80,6 +95,7 @@ body {
   text-shadow: 0 0 5px #ff211c, 0 0 14px #c81712;
   white-space: nowrap;
 }
+
 .status {
   display: flex;
   justify-content: space-between;
@@ -91,17 +107,20 @@ body {
   border-bottom: 1px solid var(--border);
   margin-bottom: 15px;
 }
+
 .section-title {
   color: #9fbaaa;
   font-size: 11px;
   letter-spacing: 2px;
   margin: 18px 0 10px;
 }
+
 .keypad {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 9px;
 }
+
 button {
   border: 1px solid #42574a;
   border-radius: 7px;
@@ -115,32 +134,45 @@ button {
   transition: transform .08s, filter .1s;
   touch-action: manipulation;
 }
+
 button:active {
   transform: translateY(2px);
   box-shadow: none;
   filter: brightness(1.3);
 }
+
 button.control {
   background: linear-gradient(#8d302c, #5a201e);
   border-color: #b24b43;
   font-size: 12px;
   letter-spacing: .5px;
 }
+
 button.utility {
   background: linear-gradient(#286044, #173d2a);
   border-color: #3d9063;
   font-size: 12px;
 }
+
+button.fill-button {
+  background: linear-gradient(#6b5730, #40331d);
+  border-color: #a88a4b;
+  font-size: 12px;
+  letter-spacing: .5px;
+}
+
 button:focus-visible {
   outline: 2px solid #76e9a2;
   outline-offset: 2px;
 }
+
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 18px;
 }
+
 .info {
   background: #0c130f;
   border: 1px solid var(--border);
@@ -148,12 +180,14 @@ button:focus-visible {
   padding: 12px;
   min-width: 0;
 }
+
 .info h3 {
   font-size: 11px;
   letter-spacing: 1px;
   color: #9fbaaa;
   margin: 0 0 10px;
 }
+
 .info pre {
   margin: 0;
   font-family: "Courier New", monospace;
@@ -163,17 +197,20 @@ button:focus-visible {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
 .log {
   max-height: 105px;
   overflow: auto;
   color: #a5b6aa !important;
 }
+
 .help {
   color: #95a99a;
   font-size: 12px;
   line-height: 1.7;
   margin-top: 18px;
 }
+
 .footer {
   text-align: center;
   font-size: 10px;
@@ -181,33 +218,57 @@ button:focus-visible {
   margin-top: 20px;
   letter-spacing: 1px;
 }
+
 @media (max-width: 420px) {
-  body { padding: 8px 5px; }
-  .app { padding: 12px; }
-  .display { padding: 8px; gap: 6px; }
-  .led { letter-spacing: 2px; }
-  button { min-height: 48px; }
-  .keypad { gap: 7px; }
+  body {
+    padding: 8px 5px;
+  }
+
+  .app {
+    padding: 12px;
+  }
+
+  .display {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .led {
+    letter-spacing: 2px;
+  }
+
+  button {
+    min-height: 48px;
+  }
+
+  .keypad {
+    gap: 7px;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <div class="app">
+
   <header class="header">
     <h1>8085 TRAINER KIT</h1>
     <p>MICROPROCESSOR LAB • VIRTUAL EDITION</p>
   </header>
 
   <div class="display">
+
     <div class="display-box">
       <div class="display-label">ADDRESS / PC</div>
       <div class="led" id="address">0000</div>
     </div>
+
     <div class="display-box">
       <div class="display-label">DATA</div>
       <div class="led" id="data">00</div>
     </div>
+
   </div>
 
   <div class="status">
@@ -215,99 +276,224 @@ button:focus-visible {
     <span id="message">RESET TO BEGIN</span>
   </div>
 
+
   <div class="section-title">HEX KEYPAD</div>
+
   <div class="keypad" id="hexpad">
+
     <button data-hex="0">0</button>
     <button data-hex="1">1</button>
     <button data-hex="2">2</button>
     <button data-hex="3">3</button>
+
     <button data-hex="4">4</button>
     <button data-hex="5">5</button>
     <button data-hex="6">6</button>
     <button data-hex="7">7</button>
+
     <button data-hex="8">8</button>
     <button data-hex="9">9</button>
     <button data-hex="A">A</button>
     <button data-hex="B">B</button>
+
     <button data-hex="C">C</button>
     <button data-hex="D">D</button>
     <button data-hex="E">E</button>
     <button data-hex="F">F</button>
+
   </div>
+
 
   <div class="section-title">MONITOR CONTROLS</div>
+
   <div class="keypad">
+
     <button class="control" id="reset">RESET</button>
+
     <button class="control" id="examMem">EXAM MEM</button>
+
     <button class="control" id="next">NEXT</button>
+
     <button class="control" id="prev">PREV</button>
+
     <button class="control" id="go">GO</button>
+
+    <button class="fill-button" id="fill">. / FILL</button>
+
     <button class="control" id="exec">EXEC</button>
+
     <button class="control" id="examReg">EXAM REG</button>
+
     <button class="utility" id="clear">CLEAR</button>
+
   </div>
+
 
   <div class="bottom-grid">
+
     <div class="info">
+
       <h3>8085 REGISTERS</h3>
+
       <pre id="registers"></pre>
+
     </div>
+
+
     <div class="info">
+
       <h3>MONITOR LOG</h3>
+
       <pre class="log" id="log">System initialized.</pre>
+
     </div>
+
   </div>
+
 
   <div class="help">
-    <b>Memory:</b> EXAM MEM → enter address → NEXT.
-    Enter a 2-digit byte → NEXT to store and advance.
-    NEXT/PREV also work without entering data.<br>
-    <b>Execute:</b> GO → enter start address → EXEC.
-    The program runs until HLT or the instruction limit.<br>
-    <b>Example:</b> At address 2000, store <code>3E</code>,
-    then at 2001 store <code>2A</code>, at 2002 store
-    <code>06</code>, at 2003 store <code>03</code>,
-    at 2004 store <code>80</code>, at 2005 store
-    <code>76</code>. Execute from 2000. Result: A = 2D.
+
+    <b>Memory:</b>
+    EXAM MEM → enter 4-digit address → NEXT.
+    Enter a 2-digit byte → NEXT or . / FILL to confirm.
+    NEXT/PREV also work without entering data.
+
+    <br><br>
+
+    <b>Program Execute:</b>
+    GO → enter starting address → . / FILL.
+    Program runs until HLT.
+
+    <br><br>
+
+    <b>Example:</b>
+    Enter:
+    <code>0E 08 06 03 79 80 32 50 20 76</code>
+    starting from <code>2000</code>.
+
+    Then press:
+    <code>. / FILL → GO → 2000 → . / FILL</code>
+
+    After execution:
+    <code>RESET → EXAM MEM → 2050 → NEXT</code>
+
+    Result:
+    <code>0B</code>
+
   </div>
 
-  <div class="footer">8085 SIMULATOR • EDUCATIONAL USE</div>
+
+  <div class="footer">
+    8085 SIMULATOR • EDUCATIONAL USE
+  </div>
+
 </div>
+
 
 <script>
 "use strict";
 
+
+/* =========================================================
+   MEMORY
+========================================================= */
+
 const memory = new Uint8Array(65536);
 
+
+/* =========================================================
+   CPU
+========================================================= */
+
 const cpu = {
-  A:0, B:0, C:0, D:0, E:0, H:0, L:0,
-  PC:0, SP:0xFFFF,
-  S:0, Z:0, AC:0, P:0, CY:0
+
+  A: 0,
+  B: 0,
+  C: 0,
+  D: 0,
+  E: 0,
+  H: 0,
+  L: 0,
+
+  PC: 0,
+  SP: 0xFFFF,
+
+  S: 0,
+  Z: 0,
+  AC: 0,
+  P: 0,
+  CY: 0
+
 };
 
+
+/* =========================================================
+   MONITOR STATE
+========================================================= */
+
 let address = 0;
+
 let mode = "ready";
+
 let buffer = "";
+
 let pendingData = false;
+
 let halted = false;
+
+
+/* =========================================================
+   DOM HELPER
+========================================================= */
 
 const $ = id => document.getElementById(id);
 
-const hex = (n, width=2) =>
-  (n >>> 0).toString(16).toUpperCase().padStart(width, "0").slice(-width);
+
+/* =========================================================
+   HEX FORMAT
+========================================================= */
+
+const hex = (n, width = 2) =>
+  (n >>> 0)
+    .toString(16)
+    .toUpperCase()
+    .padStart(width, "0")
+    .slice(-width);
+
+
+/* =========================================================
+   STATUS
+========================================================= */
 
 function setMessage(message) {
+
   $("message").textContent = message;
+
 }
+
 
 function setMode(name) {
+
   mode = name;
-  $("mode").textContent = "MODE: " + name.toUpperCase();
+
+  $("mode").textContent =
+    "MODE: " + name.toUpperCase();
+
 }
 
+
+/* =========================================================
+   RENDER
+========================================================= */
+
 function render() {
-  $("address").textContent = hex(address, 4);
-  $("data").textContent = hex(memory[address], 2);
+
+  $("address").textContent =
+    hex(address, 4);
+
+  $("data").textContent =
+    hex(memory[address], 2);
+
 
   $("registers").textContent =
 `A  ${hex(cpu.A)}   F  ${hex(flagsByte())}
@@ -318,615 +504,2075 @@ PC ${hex(cpu.PC,4)}
 SP ${hex(cpu.SP,4)}
 S:${cpu.S} Z:${cpu.Z} AC:${cpu.AC}
 P:${cpu.P} CY:${cpu.CY}`;
+
 }
+
+
+/* =========================================================
+   FLAGS
+========================================================= */
 
 function flagsByte() {
-  return (cpu.S << 7) | (cpu.Z << 6) |
-         (cpu.AC << 4) | (cpu.P << 2) | 2 | cpu.CY;
+
+  return (
+    (cpu.S << 7) |
+    (cpu.Z << 6) |
+    (cpu.AC << 4) |
+    (cpu.P << 2) |
+    2 |
+    cpu.CY
+  );
+
 }
+
+
+/* =========================================================
+   LOG
+========================================================= */
 
 function log(message) {
+
   const el = $("log");
-  el.textContent = (message + "\n" + el.textContent).slice(0, 1800);
+
+  el.textContent =
+    (message + "\n" + el.textContent)
+      .slice(0, 1800);
+
 }
 
+
+/* =========================================================
+   RESET
+   RAM IS PRESERVED
+========================================================= */
+
 function reset() {
-  Object.keys(cpu).forEach(k => cpu[k] = 0);
+
+  Object.keys(cpu).forEach(k => {
+    cpu[k] = 0;
+  });
+
   cpu.SP = 0xFFFF;
 
   address = 0;
+
   buffer = "";
+
   pendingData = false;
+
   halted = false;
 
   setMode("ready");
+
   setMessage("READY");
+
   render();
+
   log("CPU reset. RAM preserved.");
+
 }
 
-/*
-  INPUT RULES:
-  - Data input always starts fresh when no digits are pending.
-  - After two digits, the next digit starts a new byte.
-  - NEXT/PREV never require data.
-  - Only a complete two-digit byte is committed.
-*/
+
+/* =========================================================
+   CLEAR INPUT
+========================================================= */
 
 function clearBuffer() {
+
   buffer = "";
+
   pendingData = false;
 
+
   if (mode === "addr" || mode === "goaddr") {
+
     $("address").textContent = "----";
+
     setMessage("ADDRESS INPUT CLEARED");
-  } else if (mode === "mem") {
-    $("data").textContent = "--";
-    setMessage("DATA INPUT CLEARED");
-  } else {
-    render();
-    setMessage("INPUT CLEARED");
+
   }
+
+  else if (mode === "mem") {
+
+    $("data").textContent = "--";
+
+    setMessage("DATA INPUT CLEARED");
+
+  }
+
+  else {
+
+    render();
+
+    setMessage("INPUT CLEARED");
+
+  }
+
 }
+
+
+/* =========================================================
+   HEX INPUT
+========================================================= */
 
 function enterHex(digit) {
+
   digit = String(digit).toUpperCase();
 
+
+  /* -------------------------------------------------------
+     MEMORY ADDRESS / GO ADDRESS
+     IMPORTANT:
+     Start with an EMPTY buffer.
+     Display 0000 is only the default display.
+     When user presses 2, it becomes 2, not 00002.
+  ------------------------------------------------------- */
+
   if (mode === "addr" || mode === "goaddr") {
+
     if (buffer.length >= 4) {
+
       buffer = "";
+
     }
 
     buffer += digit;
-    $("address").textContent = buffer.padStart(4, "0");
-    setMessage("ADDRESS INPUT: " + buffer);
+
+
+    $("address").textContent =
+      buffer.padStart(4, "0");
+
+
+    setMessage(
+      "ADDRESS INPUT: " +
+      buffer.padStart(4, "0")
+    );
+
     return;
   }
 
+
+  /* -------------------------------------------------------
+     MEMORY DATA INPUT
+     2E MUST BECOME 2E
+     ------------------------------------------------------- */
+
   if (mode === "mem") {
-    // No pending digits means this is a brand-new byte.
+
     if (!pendingData) {
+
       buffer = "";
+
     }
 
-    // A third digit starts another byte.
+
+    /*
+      If two digits are already present,
+      next digit starts a NEW byte.
+    */
+
     if (buffer.length >= 2) {
+
       buffer = "";
+
       pendingData = false;
+
     }
+
 
     buffer += digit;
+
     pendingData = true;
 
-    $("data").textContent = buffer.padStart(2, "0");
-    setMessage("DATA INPUT: " + buffer);
+
+    $("data").textContent =
+      buffer.padStart(2, "0");
+
+
+    setMessage(
+      "DATA INPUT: " +
+      buffer.padStart(2, "0")
+    );
+
     return;
   }
 
-  setMessage("PRESS EXAM MEM OR GO");
+
+  setMessage(
+    "PRESS EXAM MEM OR GO"
+  );
+
 }
+
+
+/* =========================================================
+   EXAM MEMORY
+========================================================= */
 
 function examMemory() {
+
   buffer = "";
+
   pendingData = false;
+
 
   setMode("addr");
-  $("address").textContent = "----";
-  $("data").textContent = "--";
-  setMessage("ENTER MEMORY ADDRESS");
+
+
+  $("address").textContent =
+    "0000";
+
+  $("data").textContent =
+    "--";
+
+
+  setMessage(
+    "ENTER MEMORY ADDRESS"
+  );
+
 }
+
+
+/* =========================================================
+   CONFIRM MEMORY BYTE
+========================================================= */
+
+function commitMemoryByte() {
+
+  if (!pendingData) {
+
+    return false;
+
+  }
+
+
+  if (buffer.length === 2) {
+
+    memory[address] =
+      parseInt(buffer, 16) & 0xFF;
+
+  }
+
+  else if (buffer.length === 1) {
+
+    memory[address] =
+      parseInt(buffer, 16) & 0x0F;
+
+  }
+
+
+  log(
+    hex(address, 4) +
+    " <- " +
+    hex(memory[address])
+  );
+
+
+  buffer = "";
+
+  pendingData = false;
+
+  return true;
+
+}
+
+
+/* =========================================================
+   NEXT
+========================================================= */
 
 function next() {
-  // Finish address entry. Partial addresses are accepted too.
+
+
+  /* -------------------------------------------------------
+     ADDRESS ENTRY
+  ------------------------------------------------------- */
+
   if (mode === "addr") {
+
     if (buffer.length > 0) {
-      address = parseInt(buffer, 16) & 0xFFFF;
+
+      address =
+        parseInt(buffer, 16) & 0xFFFF;
+
     }
 
+
     buffer = "";
+
     pendingData = false;
+
+
     setMode("mem");
+
     render();
-    setMessage("MEMORY " + hex(address, 4));
+
+
+    setMessage(
+      "MEMORY " +
+      hex(address, 4)
+    );
+
     return;
   }
+
+
+  /* -------------------------------------------------------
+     MEMORY MODE
+  ------------------------------------------------------- */
 
   if (mode === "mem") {
-    // Save only if two digits were entered.
-    if (pendingData && buffer.length === 2) {
-      memory[address] = parseInt(buffer, 16) & 0xFF;
-      log(hex(address, 4) + " <- " + hex(memory[address]));
-    } else if (pendingData && buffer.length === 1) {
-      // A single digit is interpreted as the low nibble.
-      memory[address] = parseInt(buffer, 16) & 0x0F;
-      log(hex(address, 4) + " <- " + hex(memory[address]));
-    }
 
-    buffer = "";
-    pendingData = false;
+    commitMemoryByte();
 
-    // NEXT always advances, even if no data was entered.
-    address = (address + 1) & 0xFFFF;
+
+    /*
+      NEXT ALWAYS MOVES FORWARD.
+      Even if no data was entered.
+    */
+
+    address =
+      (address + 1) & 0xFFFF;
+
 
     render();
-    setMessage("MEMORY " + hex(address, 4));
+
+
+    setMessage(
+      "MEMORY " +
+      hex(address, 4)
+    );
+
     return;
   }
+
+
+  /* -------------------------------------------------------
+     REGISTER MODE
+  ------------------------------------------------------- */
 
   if (mode === "reg") {
-    setMessage("REGISTER VALUES SHOWN BELOW");
+
+    setMessage(
+      "REGISTER VALUES SHOWN BELOW"
+    );
+
     return;
   }
 
-  setMessage("USE EXAM MEM OR GO");
+
+  setMessage(
+    "USE EXAM MEM OR GO"
+  );
+
 }
+
+
+/* =========================================================
+   PREVIOUS
+========================================================= */
 
 function prev() {
+
   if (mode === "mem") {
-    // Save a pending byte before navigating, if complete.
-    if (pendingData && buffer.length === 2) {
-      memory[address] = parseInt(buffer, 16) & 0xFF;
-      log(hex(address, 4) + " <- " + hex(memory[address]));
-    } else if (pendingData && buffer.length === 1) {
-      memory[address] = parseInt(buffer, 16) & 0x0F;
-      log(hex(address, 4) + " <- " + hex(memory[address]));
-    }
 
-    buffer = "";
-    pendingData = false;
+    commitMemoryByte();
 
-    // PREV always moves backward.
-    address = (address - 1 + 0x10000) & 0xFFFF;
+
+    address =
+      (address - 1 + 0x10000) & 0xFFFF;
+
 
     render();
-    setMessage("MEMORY " + hex(address, 4));
+
+
+    setMessage(
+      "MEMORY " +
+      hex(address, 4)
+    );
+
     return;
   }
 
-  setMessage("PRESS EXAM MEM FIRST");
+
+  setMessage(
+    "PRESS EXAM MEM FIRST"
+  );
+
 }
+
+
+/* =========================================================
+   GO
+========================================================= */
 
 function go() {
+
   buffer = "";
+
   pendingData = false;
+
   halted = false;
+
 
   setMode("goaddr");
-  $("address").textContent = "----";
-  setMessage("ENTER START ADDRESS");
+
+
+  $("address").textContent =
+    "0000";
+
+
+  setMessage(
+    "ENTER START ADDRESS"
+  );
+
 }
 
-function execProgram() {
-  if (mode === "goaddr") {
-    if (buffer.length > 0) {
-      cpu.PC = parseInt(buffer, 16) & 0xFFFF;
+
+/* =========================================================
+   . / FILL BUTTON
+   CONTEXT-SENSITIVE BEHAVIOUR
+========================================================= */
+
+function fillButton() {
+
+
+  /* -------------------------------------------------------
+     CASE 1:
+     MEMORY MODE
+
+     If user has entered data such as 2E,
+     . / FILL confirms/stores it and advances.
+  ------------------------------------------------------- */
+
+  if (mode === "mem") {
+
+    if (pendingData) {
+
+      commitMemoryByte();
+
+      address =
+        (address + 1) & 0xFFFF;
+
+      render();
+
+      setMessage(
+        "MEMORY " +
+        hex(address, 4)
+      );
+
+      return;
+
     }
+
+
+    /*
+      No data:
+      behave like navigation/confirm key.
+    */
+
+    address =
+      (address + 1) & 0xFFFF;
+
+    render();
+
+    setMessage(
+      "MEMORY " +
+      hex(address, 4)
+    );
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     CASE 2:
+     GO ADDRESS MODE
+
+     Physical-kit style:
+     GO → 2000 → . / FILL
+     starts execution.
+  ------------------------------------------------------- */
+
+  if (mode === "goaddr") {
+
+    if (buffer.length === 0) {
+
+      setMessage(
+        "ENTER START ADDRESS"
+      );
+
+      return;
+    }
+
+
+    cpu.PC =
+      parseInt(buffer, 16) & 0xFFFF;
+
+
+    address =
+      cpu.PC;
+
 
     buffer = "";
+
     pendingData = false;
-    address = cpu.PC;
+
+
     setMode("execute");
-  } else if (mode !== "execute") {
-    setMessage("PRESS GO FIRST");
+
+
+    setMessage(
+      "START " +
+      hex(cpu.PC, 4) +
+      " • EXECUTING"
+    );
+
+
+    runCPU();
+
     return;
   }
+
+
+  /*
+    In other modes, FILL simply informs user.
+  */
+
+  setMessage(
+    "FILL / . NOT USED HERE"
+  );
+
+}
+
+
+/* =========================================================
+   EXEC BUTTON
+========================================================= */
+
+function execProgram() {
+
+  if (mode === "goaddr") {
+
+    if (buffer.length === 0) {
+
+      setMessage(
+        "ENTER START ADDRESS"
+      );
+
+      return;
+    }
+
+
+    cpu.PC =
+      parseInt(buffer, 16) & 0xFFFF;
+
+
+    buffer = "";
+
+    pendingData = false;
+
+    address =
+      cpu.PC;
+
+
+    setMode("execute");
+
+
+    runCPU();
+
+    return;
+  }
+
+
+  if (mode !== "execute") {
+
+    setMessage(
+      "PRESS GO FIRST"
+    );
+
+    return;
+  }
+
+
+  runCPU();
+
+}
+
+
+/* =========================================================
+   CPU RUNNER
+========================================================= */
+
+function runCPU() {
 
   halted = false;
+
   let count = 0;
 
+
   try {
-    while (!halted && count < 10000) {
-      const op = fetch8();
+
+    while (
+      !halted &&
+      count < 10000
+    ) {
+
+      const op =
+        fetch8();
+
       count++;
+
       execute(op);
+
     }
 
-    if (count >= 10000 && !halted) {
-      setMessage("INSTRUCTION LIMIT REACHED");
-    } else {
-      setMessage(halted ? "HLT • PROGRAM STOPPED" : "EXECUTION COMPLETE");
+
+    if (
+      count >= 10000 &&
+      !halted
+    ) {
+
+      setMessage(
+        "INSTRUCTION LIMIT REACHED"
+      );
+
     }
 
-    log("Executed " + count + " instruction(s). PC=" + hex(cpu.PC, 4));
-  } catch (e) {
-    halted = true;
-    setMessage("CPU ERROR: " + e.message);
-    log("CPU ERROR: " + e.message);
+    else {
+
+      setMessage(
+        halted
+          ? "HLT • PROGRAM STOPPED"
+          : "EXECUTION COMPLETE"
+      );
+
+    }
+
+
+    log(
+      "Executed " +
+      count +
+      " instruction(s). PC=" +
+      hex(cpu.PC, 4)
+    );
+
   }
 
-  address = cpu.PC;
+  catch (e) {
+
+    halted = true;
+
+    setMessage(
+      "CPU ERROR: " +
+      e.message
+    );
+
+    log(
+      "CPU ERROR: " +
+      e.message
+    );
+
+  }
+
+
+  address =
+    cpu.PC;
+
+
   render();
+
 }
+
+
+/* =========================================================
+   FETCH
+========================================================= */
 
 function fetch8() {
-  const v = memory[cpu.PC];
-  cpu.PC = (cpu.PC + 1) & 0xFFFF;
+
+  const v =
+    memory[cpu.PC];
+
+  cpu.PC =
+    (cpu.PC + 1) & 0xFFFF;
+
   return v;
+
 }
+
 
 function fetch16() {
-  const lo = fetch8();
-  const hi = fetch8();
-  return (hi << 8) | lo;
+
+  const lo =
+    fetch8();
+
+  const hi =
+    fetch8();
+
+  return (
+    hi << 8
+  ) | lo;
+
 }
+
+
+/* =========================================================
+   REGISTER PAIRS
+========================================================= */
 
 function getPair(p) {
-  if (p === 0) return (cpu.B << 8) | cpu.C;
-  if (p === 1) return (cpu.D << 8) | cpu.E;
-  if (p === 2) return (cpu.H << 8) | cpu.L;
+
+  if (p === 0)
+    return (cpu.B << 8) | cpu.C;
+
+  if (p === 1)
+    return (cpu.D << 8) | cpu.E;
+
+  if (p === 2)
+    return (cpu.H << 8) | cpu.L;
+
   return cpu.SP;
+
 }
+
 
 function setPair(p, v) {
+
   v &= 0xFFFF;
 
-  if (p === 0) { cpu.B = v >> 8; cpu.C = v & 255; }
-  else if (p === 1) { cpu.D = v >> 8; cpu.E = v & 255; }
-  else if (p === 2) { cpu.H = v >> 8; cpu.L = v & 255; }
-  else cpu.SP = v;
+
+  if (p === 0) {
+
+    cpu.B =
+      v >> 8;
+
+    cpu.C =
+      v & 255;
+
+  }
+
+  else if (p === 1) {
+
+    cpu.D =
+      v >> 8;
+
+    cpu.E =
+      v & 255;
+
+  }
+
+  else if (p === 2) {
+
+    cpu.H =
+      v >> 8;
+
+    cpu.L =
+      v & 255;
+
+  }
+
+  else {
+
+    cpu.SP = v;
+
+  }
+
 }
+
+
+/* =========================================================
+   REGISTERS
+========================================================= */
 
 function getReg(r) {
+
   switch (r) {
-    case 0: return cpu.B;
-    case 1: return cpu.C;
-    case 2: return cpu.D;
-    case 3: return cpu.E;
-    case 4: return cpu.H;
-    case 5: return cpu.L;
-    case 6: return memory[getPair(2)];
-    default: return cpu.A;
+
+    case 0:
+      return cpu.B;
+
+    case 1:
+      return cpu.C;
+
+    case 2:
+      return cpu.D;
+
+    case 3:
+      return cpu.E;
+
+    case 4:
+      return cpu.H;
+
+    case 5:
+      return cpu.L;
+
+    case 6:
+      return memory[getPair(2)];
+
+    default:
+      return cpu.A;
+
   }
+
 }
+
 
 function setReg(r, v) {
+
   v &= 255;
+
 
   switch (r) {
-    case 0: cpu.B = v; break;
-    case 1: cpu.C = v; break;
-    case 2: cpu.D = v; break;
-    case 3: cpu.E = v; break;
-    case 4: cpu.H = v; break;
-    case 5: cpu.L = v; break;
-    case 6: memory[getPair(2)] = v; break;
-    default: cpu.A = v;
+
+    case 0:
+      cpu.B = v;
+      break;
+
+    case 1:
+      cpu.C = v;
+      break;
+
+    case 2:
+      cpu.D = v;
+      break;
+
+    case 3:
+      cpu.E = v;
+      break;
+
+    case 4:
+      cpu.H = v;
+      break;
+
+    case 5:
+      cpu.L = v;
+      break;
+
+    case 6:
+      memory[getPair(2)] = v;
+      break;
+
+    default:
+      cpu.A = v;
+
   }
+
 }
+
+
+/* =========================================================
+   FLAGS
+========================================================= */
 
 function parity(v) {
+
   let bits = 0;
-  for (let i = 0; i < 8; i++) bits += (v >> i) & 1;
-  return bits % 2 === 0 ? 1 : 0;
+
+
+  for (
+    let i = 0;
+    i < 8;
+    i++
+  ) {
+
+    bits +=
+      (v >> i) & 1;
+
+  }
+
+
+  return (
+    bits % 2 === 0
+      ? 1
+      : 0
+  );
+
 }
+
 
 function setSZP(v) {
+
   v &= 255;
-  cpu.S = (v >> 7) & 1;
-  cpu.Z = v === 0 ? 1 : 0;
-  cpu.P = parity(v);
+
+
+  cpu.S =
+    (v >> 7) & 1;
+
+
+  cpu.Z =
+    v === 0
+      ? 1
+      : 0;
+
+
+  cpu.P =
+    parity(v);
+
 }
 
-function add(value, carry = 0) {
-  const a = cpu.A;
-  const result = a + value + carry;
 
-  cpu.A = result & 255;
-  cpu.CY = result > 255 ? 1 : 0;
-  cpu.AC = ((a & 15) + (value & 15) + carry) > 15 ? 1 : 0;
+/* =========================================================
+   ADD / SUB
+========================================================= */
+
+function add(
+  value,
+  carry = 0
+) {
+
+  const a =
+    cpu.A;
+
+
+  const result =
+    a + value + carry;
+
+
+  cpu.A =
+    result & 255;
+
+
+  cpu.CY =
+    result > 255
+      ? 1
+      : 0;
+
+
+  cpu.AC =
+    (
+      (a & 15) +
+      (value & 15) +
+      carry
+    ) > 15
+      ? 1
+      : 0;
+
+
   setSZP(cpu.A);
+
 }
 
-function sub(value, borrow = 0) {
-  const a = cpu.A;
-  const result = a - value - borrow;
 
-  cpu.A = result & 255;
-  cpu.CY = result < 0 ? 1 : 0;
-  cpu.AC = ((a & 15) - (value & 15) - borrow) < 0 ? 1 : 0;
+function sub(
+  value,
+  borrow = 0
+) {
+
+  const a =
+    cpu.A;
+
+
+  const result =
+    a - value - borrow;
+
+
+  cpu.A =
+    result & 255;
+
+
+  cpu.CY =
+    result < 0
+      ? 1
+      : 0;
+
+
+  cpu.AC =
+    (
+      (a & 15) -
+      (value & 15) -
+      borrow
+    ) < 0
+      ? 1
+      : 0;
+
+
   setSZP(cpu.A);
+
 }
+
+
+/* =========================================================
+   CONDITIONS
+========================================================= */
 
 function condition(code) {
+
   switch (code) {
-    case 0: return cpu.Z === 0;
-    case 1: return cpu.Z === 1;
-    case 2: return cpu.CY === 0;
-    case 3: return cpu.CY === 1;
-    case 4: return cpu.P === 0;
-    case 5: return cpu.P === 1;
-    case 6: return cpu.S === 0;
-    default: return cpu.S === 1;
+
+    case 0:
+      return cpu.Z === 0;
+
+    case 1:
+      return cpu.Z === 1;
+
+    case 2:
+      return cpu.CY === 0;
+
+    case 3:
+      return cpu.CY === 1;
+
+    case 4:
+      return cpu.P === 0;
+
+    case 5:
+      return cpu.P === 1;
+
+    case 6:
+      return cpu.S === 0;
+
+    default:
+      return cpu.S === 1;
+
   }
+
 }
+
+
+/* =========================================================
+   8085 EXECUTION
+========================================================= */
 
 function execute(op) {
-  if (op >= 0x40 && op <= 0x7F) {
+
+
+  /* MOV */
+
+  if (
+    op >= 0x40 &&
+    op <= 0x7F
+  ) {
+
     if (op === 0x76) {
+
       halted = true;
+
       return;
+
     }
 
-    setReg((op >> 3) & 7, getReg(op & 7));
+
+    setReg(
+      (op >> 3) & 7,
+      getReg(op & 7)
+    );
+
     return;
   }
 
-  if (op >= 0x80 && op <= 0x87) { add(getReg(op & 7)); return; }
-  if (op >= 0x88 && op <= 0x8F) { add(getReg(op & 7), cpu.CY); return; }
-  if (op >= 0x90 && op <= 0x97) { sub(getReg(op & 7)); return; }
-  if (op >= 0x98 && op <= 0x9F) { sub(getReg(op & 7), cpu.CY); return; }
 
-  if ((op & 0xC7) === 0x04) {
-    const r = (op >> 3) & 7;
-    const old = getReg(r);
-    const v = (old + 1) & 255;
+  /* ADD */
+
+  if (
+    op >= 0x80 &&
+    op <= 0x87
+  ) {
+
+    add(
+      getReg(op & 7)
+    );
+
+    return;
+
+  }
+
+
+  /* ADC */
+
+  if (
+    op >= 0x88 &&
+    op <= 0x8F
+  ) {
+
+    add(
+      getReg(op & 7),
+      cpu.CY
+    );
+
+    return;
+
+  }
+
+
+  /* SUB */
+
+  if (
+    op >= 0x90 &&
+    op <= 0x97
+  ) {
+
+    sub(
+      getReg(op & 7)
+    );
+
+    return;
+
+  }
+
+
+  /* SBB */
+
+  if (
+    op >= 0x98 &&
+    op <= 0x9F
+  ) {
+
+    sub(
+      getReg(op & 7),
+      cpu.CY
+    );
+
+    return;
+
+  }
+
+
+  /* INR */
+
+  if (
+    (op & 0xC7) === 0x04
+  ) {
+
+    const r =
+      (op >> 3) & 7;
+
+
+    const old =
+      getReg(r);
+
+
+    const v =
+      (old + 1) & 255;
+
 
     setReg(r, v);
-    cpu.AC = (old & 15) === 15 ? 1 : 0;
+
+
+    cpu.AC =
+      (old & 15) === 15
+        ? 1
+        : 0;
+
+
     setSZP(v);
+
     return;
+
   }
 
-  if ((op & 0xC7) === 0x05) {
-    const r = (op >> 3) & 7;
-    const old = getReg(r);
-    const v = (old - 1) & 255;
+
+  /* DCR */
+
+  if (
+    (op & 0xC7) === 0x05
+  ) {
+
+    const r =
+      (op >> 3) & 7;
+
+
+    const old =
+      getReg(r);
+
+
+    const v =
+      (old - 1) & 255;
+
 
     setReg(r, v);
-    cpu.AC = (old & 15) === 0 ? 1 : 0;
+
+
+    cpu.AC =
+      (old & 15) === 0
+        ? 1
+        : 0;
+
+
     setSZP(v);
+
     return;
+
   }
 
-  if ((op & 0xC7) === 0x06) {
-    setReg((op >> 3) & 7, fetch8());
+
+  /* MVI */
+
+  if (
+    (op & 0xC7) === 0x06
+  ) {
+
+    setReg(
+      (op >> 3) & 7,
+      fetch8()
+    );
+
     return;
+
   }
 
-  if ((op & 0xCF) === 0x01) {
-    setPair((op >> 4) & 3, fetch16());
+
+  /* LXI */
+
+  if (
+    (op & 0xCF) === 0x01
+  ) {
+
+    setPair(
+      (op >> 4) & 3,
+      fetch16()
+    );
+
     return;
+
   }
 
-  if ((op & 0xCF) === 0x03) {
-    const p = (op >> 4) & 3;
-    setPair(p, getPair(p) + 1);
+
+  /* INX */
+
+  if (
+    (op & 0xCF) === 0x03
+  ) {
+
+    const p =
+      (op >> 4) & 3;
+
+
+    setPair(
+      p,
+      getPair(p) + 1
+    );
+
     return;
+
   }
 
-  if ((op & 0xCF) === 0x0B) {
-    const p = (op >> 4) & 3;
-    setPair(p, getPair(p) - 1);
+
+  /* DCX */
+
+  if (
+    (op & 0xCF) === 0x0B
+  ) {
+
+    const p =
+      (op >> 4) & 3;
+
+
+    setPair(
+      p,
+      getPair(p) - 1
+    );
+
     return;
+
   }
+
 
   switch (op) {
-    case 0x00: return;
-    case 0x02: memory[getPair(0)] = cpu.A; return;
-    case 0x12: memory[getPair(1)] = cpu.A; return;
-    case 0x0A: cpu.A = memory[getPair(0)]; return;
-    case 0x1A: cpu.A = memory[getPair(1)]; return;
+
+    case 0x00:
+      return;
+
+
+    case 0x02:
+
+      memory[getPair(0)] =
+        cpu.A;
+
+      return;
+
+
+    case 0x12:
+
+      memory[getPair(1)] =
+        cpu.A;
+
+      return;
+
+
+    case 0x0A:
+
+      cpu.A =
+        memory[getPair(0)];
+
+      return;
+
+
+    case 0x1A:
+
+      cpu.A =
+        memory[getPair(1)];
+
+      return;
+
 
     case 0x22: {
-      const a = fetch16();
-      memory[a] = cpu.L;
-      memory[(a + 1) & 65535] = cpu.H;
+
+      const a =
+        fetch16();
+
+
+      memory[a] =
+        cpu.L;
+
+
+      memory[
+        (a + 1) & 65535
+      ] =
+        cpu.H;
+
+
       return;
+
     }
+
 
     case 0x2A: {
-      const a = fetch16();
-      cpu.L = memory[a];
-      cpu.H = memory[(a + 1) & 65535];
+
+      const a =
+        fetch16();
+
+
+      cpu.L =
+        memory[a];
+
+
+      cpu.H =
+        memory[
+          (a + 1) & 65535
+        ];
+
+
       return;
+
     }
 
-    case 0x32: memory[fetch16()] = cpu.A; return;
-    case 0x3A: cpu.A = memory[fetch16()]; return;
-    case 0xC3: cpu.PC = fetch16(); return;
+
+    case 0x32:
+
+      memory[
+        fetch16()
+      ] =
+        cpu.A;
+
+      return;
+
+
+    case 0x3A:
+
+      cpu.A =
+        memory[
+          fetch16()
+        ];
+
+      return;
+
+
+    case 0xC3:
+
+      cpu.PC =
+        fetch16();
+
+      return;
+
 
     case 0xCD: {
-      const a = fetch16();
-      cpu.SP = (cpu.SP - 1) & 65535;
-      memory[cpu.SP] = (cpu.PC >> 8) & 255;
-      cpu.SP = (cpu.SP - 1) & 65535;
-      memory[cpu.SP] = cpu.PC & 255;
-      cpu.PC = a;
+
+      const a =
+        fetch16();
+
+
+      cpu.SP =
+        (cpu.SP - 1) & 65535;
+
+
+      memory[cpu.SP] =
+        (cpu.PC >> 8) & 255;
+
+
+      cpu.SP =
+        (cpu.SP - 1) & 65535;
+
+
+      memory[cpu.SP] =
+        cpu.PC & 255;
+
+
+      cpu.PC =
+        a;
+
+
       return;
+
     }
+
 
     case 0xC9: {
-      const lo = memory[cpu.SP];
-      cpu.SP = (cpu.SP + 1) & 65535;
-      const hi = memory[cpu.SP];
-      cpu.SP = (cpu.SP + 1) & 65535;
-      cpu.PC = (hi << 8) | lo;
+
+      const lo =
+        memory[cpu.SP];
+
+
+      cpu.SP =
+        (cpu.SP + 1) & 65535;
+
+
+      const hi =
+        memory[cpu.SP];
+
+
+      cpu.SP =
+        (cpu.SP + 1) & 65535;
+
+
+      cpu.PC =
+        (hi << 8) | lo;
+
+
       return;
+
     }
 
-    case 0xC6: add(fetch8()); return;
-    case 0xCE: add(fetch8(), cpu.CY); return;
-    case 0xD6: sub(fetch8()); return;
-    case 0xDE: sub(fetch8(), cpu.CY); return;
+
+    case 0xC6:
+
+      add(fetch8());
+
+      return;
+
+
+    case 0xCE:
+
+      add(
+        fetch8(),
+        cpu.CY
+      );
+
+      return;
+
+
+    case 0xD6:
+
+      sub(fetch8());
+
+      return;
+
+
+    case 0xDE:
+
+      sub(
+        fetch8(),
+        cpu.CY
+      );
+
+      return;
+
 
     case 0xE6:
-      cpu.A &= fetch8();
+
+      cpu.A &=
+        fetch8();
+
       cpu.CY = 0;
+
       cpu.AC = 1;
+
       setSZP(cpu.A);
+
       return;
+
 
     case 0xEE:
-      cpu.A ^= fetch8();
+
+      cpu.A ^=
+        fetch8();
+
       cpu.CY = 0;
+
       cpu.AC = 0;
+
       setSZP(cpu.A);
+
       return;
+
 
     case 0xF6:
-      cpu.A |= fetch8();
+
+      cpu.A |=
+        fetch8();
+
       cpu.CY = 0;
+
       cpu.AC = 0;
+
       setSZP(cpu.A);
+
       return;
+
 
     case 0xFE: {
-      const v = fetch8();
-      const a = cpu.A;
-      const r = (a - v) & 255;
 
-      cpu.CY = a < v ? 1 : 0;
-      cpu.AC = (a & 15) < (v & 15) ? 1 : 0;
+      const v =
+        fetch8();
+
+
+      const a =
+        cpu.A;
+
+
+      const r =
+        (a - v) & 255;
+
+
+      cpu.CY =
+        a < v
+          ? 1
+          : 0;
+
+
+      cpu.AC =
+        (a & 15) < (v & 15)
+          ? 1
+          : 0;
+
+
       setSZP(r);
+
       return;
+
     }
+
 
     case 0xAF:
+
       cpu.A = 0;
+
       cpu.CY = 0;
+
       cpu.AC = 0;
+
       setSZP(cpu.A);
+
       return;
 
-    case 0xC5: case 0xD5: case 0xE5: case 0xF5: {
-      const p = (op >> 4) & 3;
-      const val = p === 3
-        ? ((cpu.A << 8) | flagsByte())
-        : getPair(p);
 
-      cpu.SP = (cpu.SP - 1) & 65535;
-      memory[cpu.SP] = (val >> 8) & 255;
-      cpu.SP = (cpu.SP - 1) & 65535;
-      memory[cpu.SP] = val & 255;
+    /* PUSH */
+
+    case 0xC5:
+    case 0xD5:
+    case 0xE5:
+    case 0xF5: {
+
+      const p =
+        (op >> 4) & 3;
+
+
+      const val =
+        p === 3
+          ? ((cpu.A << 8) | flagsByte())
+          : getPair(p);
+
+
+      cpu.SP =
+        (cpu.SP - 1) & 65535;
+
+
+      memory[cpu.SP] =
+        (val >> 8) & 255;
+
+
+      cpu.SP =
+        (cpu.SP - 1) & 65535;
+
+
+      memory[cpu.SP] =
+        val & 255;
+
+
       return;
+
     }
 
-    case 0xC1: case 0xD1: case 0xE1: case 0xF1: {
-      const p = (op >> 4) & 3;
-      const lo = memory[cpu.SP];
-      cpu.SP = (cpu.SP + 1) & 65535;
-      const hi = memory[cpu.SP];
-      cpu.SP = (cpu.SP + 1) & 65535;
-      const val = (hi << 8) | lo;
+
+    /* POP */
+
+    case 0xC1:
+    case 0xD1:
+    case 0xE1:
+    case 0xF1: {
+
+      const p =
+        (op >> 4) & 3;
+
+
+      const lo =
+        memory[cpu.SP];
+
+
+      cpu.SP =
+        (cpu.SP + 1) & 65535;
+
+
+      const hi =
+        memory[cpu.SP];
+
+
+      cpu.SP =
+        (cpu.SP + 1) & 65535;
+
+
+      const val =
+        (hi << 8) | lo;
+
 
       if (p === 3) {
+
         cpu.A = hi;
+
         const f = lo;
-        cpu.S = (f >> 7) & 1;
-        cpu.Z = (f >> 6) & 1;
-        cpu.AC = (f >> 4) & 1;
-        cpu.P = (f >> 2) & 1;
-        cpu.CY = f & 1;
-      } else {
-        setPair(p, val);
+
+
+        cpu.S =
+          (f >> 7) & 1;
+
+        cpu.Z =
+          (f >> 6) & 1;
+
+        cpu.AC =
+          (f >> 4) & 1;
+
+        cpu.P =
+          (f >> 2) & 1;
+
+        cpu.CY =
+          f & 1;
+
       }
+
+      else {
+
+        setPair(
+          p,
+          val
+        );
+
+      }
+
       return;
+
     }
+
+
+    /* RLC */
 
     case 0x07:
-      cpu.CY = (cpu.A >> 7) & 1;
-      cpu.A = ((cpu.A << 1) | (cpu.A >> 7)) & 255;
+
+      cpu.CY =
+        (cpu.A >> 7) & 1;
+
+
+      cpu.A =
+        (
+          (cpu.A << 1) |
+          (cpu.A >> 7)
+        ) & 255;
+
+
       return;
+
+
+    /* RRC */
 
     case 0x0F:
-      cpu.CY = cpu.A & 1;
-      cpu.A = ((cpu.A >> 1) | (cpu.A << 7)) & 255;
+
+      cpu.CY =
+        cpu.A & 1;
+
+
+      cpu.A =
+        (
+          (cpu.A >> 1) |
+          (cpu.A << 7)
+        ) & 255;
+
+
       return;
+
+
+    /* RAL */
 
     case 0x17: {
-      const c = cpu.CY;
-      cpu.CY = (cpu.A >> 7) & 1;
-      cpu.A = ((cpu.A << 1) | c) & 255;
+
+      const c =
+        cpu.CY;
+
+
+      cpu.CY =
+        (cpu.A >> 7) & 1;
+
+
+      cpu.A =
+        (
+          (cpu.A << 1) |
+          c
+        ) & 255;
+
+
       return;
+
     }
+
+
+    /* RAR */
 
     case 0x1F: {
-      const c = cpu.CY;
-      cpu.CY = cpu.A & 1;
-      cpu.A = ((cpu.A >> 1) | (c << 7)) & 255;
+
+      const c =
+        cpu.CY;
+
+
+      cpu.CY =
+        cpu.A & 1;
+
+
+      cpu.A =
+        (
+          (cpu.A >> 1) |
+          (c << 7)
+        ) & 255;
+
+
       return;
+
     }
+
+
+    /* DAA */
 
     case 0x27: {
-      let correction = 0;
-      let carry = cpu.CY;
 
-      if ((cpu.A & 15) > 9 || cpu.AC) correction |= 6;
-      if (cpu.A > 0x99 || cpu.CY) {
-        correction |= 0x60;
-        carry = 1;
+      let correction = 0;
+
+      let carry =
+        cpu.CY;
+
+
+      if (
+        (cpu.A & 15) > 9 ||
+        cpu.AC
+      ) {
+
+        correction |= 6;
+
       }
 
-      const old = cpu.A;
-      cpu.A = (cpu.A + correction) & 255;
-      cpu.CY = carry;
-      cpu.AC = ((old & 15) + (correction & 15)) > 15 ? 1 : 0;
+
+      if (
+        cpu.A > 0x99 ||
+        cpu.CY
+      ) {
+
+        correction |= 0x60;
+
+        carry = 1;
+
+      }
+
+
+      const old =
+        cpu.A;
+
+
+      cpu.A =
+        (cpu.A + correction) & 255;
+
+
+      cpu.CY =
+        carry;
+
+
+      cpu.AC =
+        (
+          (old & 15) +
+          (correction & 15)
+        ) > 15
+          ? 1
+          : 0;
+
+
       setSZP(cpu.A);
+
       return;
+
     }
 
-    case 0x2F: cpu.A = (~cpu.A) & 255; return;
-    case 0x37: cpu.CY = 1; return;
-    case 0x3F: cpu.CY = cpu.CY ? 0 : 1; return;
-    case 0xF3: return;
-    case 0xFB: return;
+
+    case 0x2F:
+
+      cpu.A =
+        (~cpu.A) & 255;
+
+      return;
+
+
+    case 0x37:
+
+      cpu.CY = 1;
+
+      return;
+
+
+    case 0x3F:
+
+      cpu.CY =
+        cpu.CY
+          ? 0
+          : 1;
+
+      return;
+
+
+    case 0xF3:
+      return;
+
+
+    case 0xFB:
+      return;
+
   }
 
-  if ((op & 0xC7) === 0xC0) {
-    if (condition((op >> 3) & 7)) {
-      const lo = memory[cpu.SP];
-      cpu.SP = (cpu.SP + 1) & 65535;
-      const hi = memory[cpu.SP];
-      cpu.SP = (cpu.SP + 1) & 65535;
-      cpu.PC = (hi << 8) | lo;
+
+  /* =====================================================
+     CONDITIONAL RETURN
+  ===================================================== */
+
+  if (
+    (op & 0xC7) === 0xC0
+  ) {
+
+    if (
+      condition(
+        (op >> 3) & 7
+      )
+    ) {
+
+      const lo =
+        memory[cpu.SP];
+
+
+      cpu.SP =
+        (cpu.SP + 1) & 65535;
+
+
+      const hi =
+        memory[cpu.SP];
+
+
+      cpu.SP =
+        (cpu.SP + 1) & 65535;
+
+
+      cpu.PC =
+        (hi << 8) | lo;
+
     }
+
     return;
+
   }
 
-  if ((op & 0xC7) === 0xC2) {
-    const a = fetch16();
-    if (condition((op >> 3) & 7)) cpu.PC = a;
-    return;
-  }
 
-  if ((op & 0xC7) === 0xC4) {
-    const a = fetch16();
+  /* =====================================================
+     CONDITIONAL JUMP
+  ===================================================== */
 
-    if (condition((op >> 3) & 7)) {
-      cpu.SP = (cpu.SP - 1) & 65535;
-      memory[cpu.SP] = (cpu.PC >> 8) & 255;
-      cpu.SP = (cpu.SP - 1) & 65535;
-      memory[cpu.SP] = cpu.PC & 255;
-      cpu.PC = a;
+  if (
+    (op & 0xC7) === 0xC2
+  ) {
+
+    const a =
+      fetch16();
+
+
+    if (
+      condition(
+        (op >> 3) & 7
+      )
+    ) {
+
+      cpu.PC =
+        a;
+
     }
+
     return;
+
   }
 
-  throw new Error("Unsupported opcode " + hex(op));
+
+  /* =====================================================
+     CONDITIONAL CALL
+  ===================================================== */
+
+  if (
+    (op & 0xC7) === 0xC4
+  ) {
+
+    const a =
+      fetch16();
+
+
+    if (
+      condition(
+        (op >> 3) & 7
+      )
+    ) {
+
+      cpu.SP =
+        (cpu.SP - 1) & 65535;
+
+
+      memory[cpu.SP] =
+        (cpu.PC >> 8) & 255;
+
+
+      cpu.SP =
+        (cpu.SP - 1) & 65535;
+
+
+      memory[cpu.SP] =
+        cpu.PC & 255;
+
+
+      cpu.PC =
+        a;
+
+    }
+
+    return;
+
+  }
+
+
+  throw new Error(
+    "Unsupported opcode " +
+    hex(op)
+  );
+
 }
 
-$("hexpad").addEventListener("click", e => {
-  const btn = e.target.closest("[data-hex]");
-  if (btn) enterHex(btn.dataset.hex);
-});
 
-$("reset").addEventListener("click", reset);
-$("clear").addEventListener("click", clearBuffer);
-$("examMem").addEventListener("click", examMemory);
-$("next").addEventListener("click", next);
-$("prev").addEventListener("click", prev);
-$("go").addEventListener("click", go);
-$("exec").addEventListener("click", execProgram);
+/* =========================================================
+   HEX KEYPAD CLICK
+========================================================= */
 
-$("examReg").addEventListener("click", () => {
-  buffer = "";
-  pendingData = false;
-  setMode("reg");
-  setMessage("REGISTER VALUES SHOWN BELOW");
-  render();
-});
+$("hexpad").addEventListener(
+  "click",
+  e => {
+
+    const btn =
+      e.target.closest(
+        "[data-hex]"
+      );
+
+
+    if (btn) {
+
+      enterHex(
+        btn.dataset.hex
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   BUTTON EVENTS
+========================================================= */
+
+$("reset").addEventListener(
+  "click",
+  reset
+);
+
+
+$("clear").addEventListener(
+  "click",
+  clearBuffer
+);
+
+
+$("examMem").addEventListener(
+  "click",
+  examMemory
+);
+
+
+$("next").addEventListener(
+  "click",
+  next
+);
+
+
+$("prev").addEventListener(
+  "click",
+  prev
+);
+
+
+$("go").addEventListener(
+  "click",
+  go
+);
+
+
+/*
+  IMPORTANT:
+  . / FILL is the physical-kit style
+  confirm/start button.
+*/
+
+$("fill").addEventListener(
+  "click",
+  fillButton
+);
+
+
+$("exec").addEventListener(
+  "click",
+  execProgram
+);
+
+
+$("examReg").addEventListener(
+  "click",
+  () => {
+
+    buffer = "";
+
+    pendingData = false;
+
+    setMode("reg");
+
+    setMessage(
+      "REGISTER VALUES SHOWN BELOW"
+    );
+
+    render();
+
+  }
+);
+
+
+/* =========================================================
+   INITIAL DISPLAY
+========================================================= */
 
 render();
+
 </script>
+
 </body>
 </html>
+```
