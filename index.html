@@ -334,95 +334,142 @@ function reset() {
   render();
   log("CPU reset. RAM preserved.");
 }
+
+/* CLEAR now clears only the unfinished input.
+   Already stored memory bytes are not erased. */
 function clearBuffer() {
   buffer = "";
   pendingData = false;
-  render();
-  setMessage("INPUT CLEARED");
+
+  if (mode === "addr" || mode === "goaddr") {
+    $("address").textContent = "----";
+    setMessage("ADDRESS INPUT CLEARED");
+  } else if (mode === "mem") {
+    $("data").textContent = "--";
+    setMessage("DATA INPUT CLEARED");
+  } else {
+    setMessage("INPUT CLEARED");
+    render();
+  }
 }
+
+/* Entering more digits after a full field starts
+   a fresh input, so the address/data is editable. */
 function enterHex(digit) {
   if (mode === "addr" || mode === "goaddr") {
-    if (buffer.length < 4) buffer += digit;
+    if (buffer.length >= 4) {
+      buffer = "";
+    }
+
+    buffer += digit;
     $("address").textContent = buffer.padStart(4, "0");
-    setMessage("ADDRESS INPUT " + buffer);
+    setMessage("ADDRESS INPUT: " + buffer);
     return;
   }
-  if (mode === "data" || mode === "mem") {
-    if (buffer.length < 2) buffer += digit;
-    $("data").textContent = buffer.padStart(2, "0");
+
+  if (mode === "mem" || mode === "data") {
+    if (buffer.length >= 2) {
+      buffer = "";
+      pendingData = false;
+    }
+
+    buffer += digit;
     pendingData = true;
-    setMessage("DATA INPUT " + buffer);
+    $("data").textContent = buffer.padStart(2, "0");
+    setMessage("DATA INPUT: " + buffer);
     return;
   }
+
   setMessage("PRESS EXAM MEM OR GO");
 }
+
 function examMemory() {
   buffer = "";
   pendingData = false;
   setMode("addr");
-  setMessage("ENTER 4-DIGIT ADDRESS");
   $("address").textContent = "----";
+  $("data").textContent = "--";
+  setMessage("ENTER 4-DIGIT ADDRESS");
 }
+
 function next() {
   if (mode === "addr") {
-    if (buffer.length === 0) return setMessage("ENTER ADDRESS FIRST");
+    if (buffer.length !== 4) {
+      setMessage("ENTER ALL 4 ADDRESS DIGITS");
+      return;
+    }
+
     address = parseInt(buffer, 16) & 0xFFFF;
     buffer = "";
+    pendingData = false;
     setMode("mem");
     render();
-    setMessage("MEMORY EXAMINE");
+    setMessage("MEMORY EXAMINE - ENTER BYTE");
     return;
   }
+
   if (mode === "mem") {
-    if (pendingData) {
-      memory[address] = parseInt(buffer, 16) & 0xFF;
-      log(hex(address,4) + " <- " + hex(memory[address]));
-      address = (address + 1) & 0xFFFF;
-      buffer = "";
-      pendingData = false;
-      render();
-      setMessage("BYTE STORED • NEXT ADDRESS");
-    } else {
-      render();
-      setMessage("ENTER BYTE THEN NEXT TO STORE");
+    if (!pendingData || buffer.length !== 2) {
+      setMessage("ENTER BOTH DATA DIGITS FIRST");
+      return;
     }
+
+    memory[address] = parseInt(buffer, 16) & 0xFF;
+    log(hex(address, 4) + " <- " + hex(memory[address]));
+
+    address = (address + 1) & 0xFFFF;
+    buffer = "";
+    pendingData = false;
+    render();
+    setMessage("BYTE STORED • NEXT ADDRESS");
     return;
   }
+
   if (mode === "reg") {
     const names = ["A","B","C","D","E","H","L","SP","PC"];
     const i = names.indexOf(buffer);
+
     if (i >= 0) {
       setMessage(names[i] + " = " +
         hex(cpu[names[i]], names[i].length === 1 ? 2 : 4));
     } else {
-      setMessage("SELECT A B C D E H L SP PC");
+      setMessage("REGISTER VALUES SHOWN BELOW");
     }
     return;
   }
+
   setMessage("USE EXAM MEM OR GO");
 }
+
 function prev() {
   if (mode === "mem") {
     address = (address - 1) & 0xFFFF;
     buffer = "";
     pendingData = false;
     render();
-    setMessage("PREVIOUS ADDRESS");
+    setMessage("PREVIOUS ADDRESS - ENTER BYTE TO EDIT");
   } else {
     setMessage("PREV WORKS IN MEMORY MODE");
   }
 }
+
 function go() {
   buffer = "";
+  pendingData = false;
   halted = false;
   setMode("goaddr");
   $("address").textContent = "----";
-  setMessage("ENTER START ADDRESS");
+  setMessage("ENTER 4-DIGIT START ADDRESS");
 }
+
 function execProgram() {
   if (mode === "goaddr") {
-    if (!buffer.length) return setMessage("ENTER START ADDRESS");
-    cpu.PC = parseInt(buffer,16) & 0xFFFF;
+    if (buffer.length !== 4) {
+      setMessage("ENTER ALL 4 ADDRESS DIGITS");
+      return;
+    }
+
+    cpu.PC = parseInt(buffer, 16) & 0xFFFF;
     address = cpu.PC;
     buffer = "";
     setMode("execute");
@@ -433,31 +480,31 @@ function execProgram() {
 
   halted = false;
   let count = 0;
+
   try {
     while (!halted && count < 10000) {
-      const oldPC = cpu.PC;
       const op = fetch8();
       count++;
       execute(op);
-      if (halted) break;
-      if (cpu.PC === oldPC) {
-        throw new Error("PC did not advance");
-      }
     }
+
     if (count >= 10000 && !halted) {
       setMessage("INSTRUCTION LIMIT REACHED");
     } else {
       setMessage(halted ? "HLT • PROGRAM STOPPED" : "EXECUTION COMPLETE");
     }
-    log("Executed " + count + " instruction(s). PC=" + hex(cpu.PC,4));
+
+    log("Executed " + count + " instruction(s). PC=" + hex(cpu.PC, 4));
   } catch (e) {
     halted = true;
     setMessage("CPU ERROR: " + e.message);
     log("CPU ERROR: " + e.message);
   }
+
   address = cpu.PC;
   render();
 }
+
 function fetch8() {
   const v = memory[cpu.PC];
   cpu.PC = (cpu.PC + 1) & 0xFFFF;
@@ -475,34 +522,40 @@ function getPair(p) {
 }
 function setPair(p, v) {
   v &= 0xFFFF;
-  if (p === 0) { cpu.B=v>>8; cpu.C=v&255; }
-  else if (p === 1) { cpu.D=v>>8; cpu.E=v&255; }
-  else if (p === 2) { cpu.H=v>>8; cpu.L=v&255; }
-  else cpu.SP=v;
+  if (p === 0) { cpu.B = v >> 8; cpu.C = v & 255; }
+  else if (p === 1) { cpu.D = v >> 8; cpu.E = v & 255; }
+  else if (p === 2) { cpu.H = v >> 8; cpu.L = v & 255; }
+  else cpu.SP = v;
 }
 function getReg(r) {
-  switch(r) {
-    case 0:return cpu.B; case 1:return cpu.C;
-    case 2:return cpu.D; case 3:return cpu.E;
-    case 4:return cpu.H; case 5:return cpu.L;
-    case 6:return memory[getPair(2)];
-    default:return cpu.A;
+  switch (r) {
+    case 0: return cpu.B;
+    case 1: return cpu.C;
+    case 2: return cpu.D;
+    case 3: return cpu.E;
+    case 4: return cpu.H;
+    case 5: return cpu.L;
+    case 6: return memory[getPair(2)];
+    default: return cpu.A;
   }
 }
-function setReg(r,v) {
+function setReg(r, v) {
   v &= 255;
-  switch(r) {
-    case 0:cpu.B=v;break; case 1:cpu.C=v;break;
-    case 2:cpu.D=v;break; case 3:cpu.E=v;break;
-    case 4:cpu.H=v;break; case 5:cpu.L=v;break;
-    case 6:memory[getPair(2)]=v;break;
-    default:cpu.A=v;
+  switch (r) {
+    case 0: cpu.B = v; break;
+    case 1: cpu.C = v; break;
+    case 2: cpu.D = v; break;
+    case 3: cpu.E = v; break;
+    case 4: cpu.H = v; break;
+    case 5: cpu.L = v; break;
+    case 6: memory[getPair(2)] = v; break;
+    default: cpu.A = v;
   }
 }
 function parity(v) {
-  let bits=0;
-  for(let i=0;i<8;i++) bits += (v>>i)&1;
-  return bits%2===0 ? 1 : 0;
+  let bits = 0;
+  for (let i = 0; i < 8; i++) bits += (v >> i) & 1;
+  return bits % 2 === 0 ? 1 : 0;
 }
 function setSZP(v) {
   v &= 255;
@@ -510,170 +563,212 @@ function setSZP(v) {
   cpu.Z = v === 0 ? 1 : 0;
   cpu.P = parity(v);
 }
-function add(value, carry=0) {
-  const a=cpu.A, result=a+value+carry;
-  cpu.A=result&255;
-  cpu.CY=result>255?1:0;
-  cpu.AC=((a&15)+(value&15)+carry)>15?1:0;
+function add(value, carry = 0) {
+  const a = cpu.A, result = a + value + carry;
+  cpu.A = result & 255;
+  cpu.CY = result > 255 ? 1 : 0;
+  cpu.AC = ((a & 15) + (value & 15) + carry) > 15 ? 1 : 0;
   setSZP(cpu.A);
 }
-function sub(value, borrow=0) {
-  const a=cpu.A, result=a-value-borrow;
-  cpu.A=result&255;
-  cpu.CY=result<0?1:0;
-  cpu.AC=((a&15)-(value&15)-borrow)<0?1:0;
+function sub(value, borrow = 0) {
+  const a = cpu.A, result = a - value - borrow;
+  cpu.A = result & 255;
+  cpu.CY = result < 0 ? 1 : 0;
+  cpu.AC = ((a & 15) - (value & 15) - borrow) < 0 ? 1 : 0;
   setSZP(cpu.A);
 }
 function condition(code) {
-  switch(code) {
-    case 0:return cpu.Z===0;
-    case 1:return cpu.Z===1;
-    case 2:return cpu.CY===0;
-    case 3:return cpu.CY===1;
-    case 4:return cpu.P===0;
-    case 5:return cpu.P===1;
-    case 6:return cpu.S===0;
-    default:return cpu.S===1;
+  switch (code) {
+    case 0: return cpu.Z === 0;
+    case 1: return cpu.Z === 1;
+    case 2: return cpu.CY === 0;
+    case 3: return cpu.CY === 1;
+    case 4: return cpu.P === 0;
+    case 5: return cpu.P === 1;
+    case 6: return cpu.S === 0;
+    default: return cpu.S === 1;
   }
 }
+
 function execute(op) {
-  // MOV r,r and HLT
   if (op >= 0x40 && op <= 0x7F) {
-    if (op === 0x76) { halted=true; return; }
-    setReg((op>>3)&7, getReg(op&7));
+    if (op === 0x76) { halted = true; return; }
+    setReg((op >> 3) & 7, getReg(op & 7));
     return;
   }
-  // ADD r
-  if (op >= 0x80 && op <= 0x87) {
-    add(getReg(op&7)); return;
-  }
-  // ADC r
-  if (op >= 0x88 && op <= 0x8F) {
-    add(getReg(op&7),cpu.CY); return;
-  }
-  // SUB r
-  if (op >= 0x90 && op <= 0x97) {
-    sub(getReg(op&7)); return;
-  }
-  // SBB r
-  if (op >= 0x98 && op <= 0x9F) {
-    sub(getReg(op&7),cpu.CY); return;
-  }
-  // INR r
+  if (op >= 0x80 && op <= 0x87) { add(getReg(op & 7)); return; }
+  if (op >= 0x88 && op <= 0x8F) { add(getReg(op & 7), cpu.CY); return; }
+  if (op >= 0x90 && op <= 0x97) { sub(getReg(op & 7)); return; }
+  if (op >= 0x98 && op <= 0x9F) { sub(getReg(op & 7), cpu.CY); return; }
+
   if ((op & 0xC7) === 0x04) {
-    const r=(op>>3)&7, old=getReg(r), v=(old+1)&255;
-    setReg(r,v);
-    cpu.AC=(old&15)===15?1:0;
+    const r = (op >> 3) & 7, old = getReg(r), v = (old + 1) & 255;
+    setReg(r, v);
+    cpu.AC = (old & 15) === 15 ? 1 : 0;
     setSZP(v);
     return;
   }
-  // DCR r
   if ((op & 0xC7) === 0x05) {
-    const r=(op>>3)&7, old=getReg(r), v=(old-1)&255;
-    setReg(r,v);
-    cpu.AC=(old&15)===0?1:0;
+    const r = (op >> 3) & 7, old = getReg(r), v = (old - 1) & 255;
+    setReg(r, v);
+    cpu.AC = (old & 15) === 0 ? 1 : 0;
     setSZP(v);
     return;
   }
-  // MVI r,byte
   if ((op & 0xC7) === 0x06) {
-    setReg((op>>3)&7,fetch8()); return;
+    setReg((op >> 3) & 7, fetch8());
+    return;
   }
-  // LXI rp,word
   if ((op & 0xCF) === 0x01) {
-    setPair((op>>4)&3,fetch16()); return;
+    setPair((op >> 4) & 3, fetch16());
+    return;
   }
-  // INX / DCX
   if ((op & 0xCF) === 0x03) {
-    const p=(op>>4)&3; setPair(p,getPair(p)+1); return;
+    const p = (op >> 4) & 3;
+    setPair(p, getPair(p) + 1);
+    return;
   }
   if ((op & 0xCF) === 0x0B) {
-    const p=(op>>4)&3; setPair(p,getPair(p)-1); return;
+    const p = (op >> 4) & 3;
+    setPair(p, getPair(p) - 1);
+    return;
   }
-  switch(op) {
-    case 0x00: return; // NOP
-    case 0x02: memory[getPair(0)]=cpu.A; return; // STAX B
-    case 0x12: memory[getPair(1)]=cpu.A; return; // STAX D
-    case 0x0A: cpu.A=memory[getPair(0)]; return; // LDAX B
-    case 0x1A: cpu.A=memory[getPair(1)]; return; // LDAX D
-    case 0x22: { const a=fetch16(); memory[a]=cpu.L; memory[(a+1)&65535]=cpu.H; return; }
-    case 0x2A: { const a=fetch16(); cpu.L=memory[a]; cpu.H=memory[(a+1)&65535]; return; }
-    case 0x32: memory[fetch16()]=cpu.A; return; // STA
-    case 0x3A: cpu.A=memory[fetch16()]; return; // LDA
-    case 0xC3: cpu.PC=fetch16(); return; // JMP
-    case 0xCD: { const a=fetch16(); cpu.SP=(cpu.SP-1)&65535; memory[cpu.SP]=cpu.PC>>8; cpu.SP=(cpu.SP-1)&65535; memory[cpu.SP]=cpu.PC&255; cpu.PC=a; return; }
-    case 0xC9: { const lo=memory[cpu.SP]; cpu.SP=(cpu.SP+1)&65535; const hi=memory[cpu.SP]; cpu.SP=(cpu.SP+1)&65535; cpu.PC=(hi<<8)|lo; return; }
-    case 0xC6: add(fetch8()); return; // ADI
-    case 0xCE: add(fetch8(),cpu.CY); return; // ACI
-    case 0xD6: sub(fetch8()); return; // SUI
-    case 0xDE: sub(fetch8(),cpu.CY); return; // SBI
-    case 0xE6: cpu.A &= fetch8(); cpu.CY=0; cpu.AC=1; setSZP(cpu.A); return;
-    case 0xEE: cpu.A ^= fetch8(); cpu.CY=0; cpu.AC=0; setSZP(cpu.A); return;
-    case 0xF6: cpu.A |= fetch8(); cpu.CY=0; cpu.AC=0; setSZP(cpu.A); return;
-    case 0xFE: { const v=fetch8(), a=cpu.A; const r=(a-v)&255; cpu.CY=a<v?1:0; cpu.AC=(a&15)<(v&15)?1:0; setSZP(r); return; }
-    case 0xAF: cpu.A=0; cpu.CY=0; cpu.AC=0; setSZP(cpu.A); return;
+
+  switch (op) {
+    case 0x00: return;
+    case 0x02: memory[getPair(0)] = cpu.A; return;
+    case 0x12: memory[getPair(1)] = cpu.A; return;
+    case 0x0A: cpu.A = memory[getPair(0)]; return;
+    case 0x1A: cpu.A = memory[getPair(1)]; return;
+    case 0x22: {
+      const a = fetch16();
+      memory[a] = cpu.L;
+      memory[(a + 1) & 65535] = cpu.H;
+      return;
+    }
+    case 0x2A: {
+      const a = fetch16();
+      cpu.L = memory[a];
+      cpu.H = memory[(a + 1) & 65535];
+      return;
+    }
+    case 0x32: memory[fetch16()] = cpu.A; return;
+    case 0x3A: cpu.A = memory[fetch16()]; return;
+    case 0xC3: cpu.PC = fetch16(); return;
+    case 0xCD: {
+      const a = fetch16();
+      cpu.SP = (cpu.SP - 1) & 65535;
+      memory[cpu.SP] = (cpu.PC >> 8) & 255;
+      cpu.SP = (cpu.SP - 1) & 65535;
+      memory[cpu.SP] = cpu.PC & 255;
+      cpu.PC = a;
+      return;
+    }
+    case 0xC9: {
+      const lo = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      const hi = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      cpu.PC = (hi << 8) | lo;
+      return;
+    }
+    case 0xC6: add(fetch8()); return;
+    case 0xCE: add(fetch8(), cpu.CY); return;
+    case 0xD6: sub(fetch8()); return;
+    case 0xDE: sub(fetch8(), cpu.CY); return;
+    case 0xE6: cpu.A &= fetch8(); cpu.CY = 0; cpu.AC = 1; setSZP(cpu.A); return;
+    case 0xEE: cpu.A ^= fetch8(); cpu.CY = 0; cpu.AC = 0; setSZP(cpu.A); return;
+    case 0xF6: cpu.A |= fetch8(); cpu.CY = 0; cpu.AC = 0; setSZP(cpu.A); return;
+    case 0xFE: {
+      const v = fetch8(), a = cpu.A, r = (a - v) & 255;
+      cpu.CY = a < v ? 1 : 0;
+      cpu.AC = (a & 15) < (v & 15) ? 1 : 0;
+      setSZP(r);
+      return;
+    }
+    case 0xAF: cpu.A = 0; cpu.CY = 0; cpu.AC = 0; setSZP(cpu.A); return;
     case 0xC5: case 0xD5: case 0xE5: case 0xF5: {
-      const p=(op>>4)&3;
-      const val=p===3?((cpu.A<<8)|flagsByte()):getPair(p);
-      cpu.SP=(cpu.SP-1)&65535; memory[cpu.SP]=(val>>8)&255;
-      cpu.SP=(cpu.SP-1)&65535; memory[cpu.SP]=val&255;
+      const p = (op >> 4) & 3;
+      const val = p === 3 ? ((cpu.A << 8) | flagsByte()) : getPair(p);
+      cpu.SP = (cpu.SP - 1) & 65535;
+      memory[cpu.SP] = (val >> 8) & 255;
+      cpu.SP = (cpu.SP - 1) & 65535;
+      memory[cpu.SP] = val & 255;
       return;
     }
     case 0xC1: case 0xD1: case 0xE1: case 0xF1: {
-      const p=(op>>4)&3;
-      const lo=memory[cpu.SP]; cpu.SP=(cpu.SP+1)&65535;
-      const hi=memory[cpu.SP]; cpu.SP=(cpu.SP+1)&65535;
-      const val=(hi<<8)|lo;
-      if(p===3) {
-        cpu.A=hi; const f=lo;
-        cpu.S=(f>>7)&1; cpu.Z=(f>>6)&1; cpu.AC=(f>>4)&1;
-        cpu.P=(f>>2)&1; cpu.CY=f&1;
-      } else setPair(p,val);
+      const p = (op >> 4) & 3;
+      const lo = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      const hi = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      const val = (hi << 8) | lo;
+      if (p === 3) {
+        cpu.A = hi;
+        const f = lo;
+        cpu.S = (f >> 7) & 1;
+        cpu.Z = (f >> 6) & 1;
+        cpu.AC = (f >> 4) & 1;
+        cpu.P = (f >> 2) & 1;
+        cpu.CY = f & 1;
+      } else {
+        setPair(p, val);
+      }
       return;
     }
-    case 0x07: cpu.CY=(cpu.A>>7)&1; cpu.A=((cpu.A<<1)|(cpu.A>>7))&255; return;
-    case 0x0F: cpu.CY=cpu.A&1; cpu.A=((cpu.A>>1)|(cpu.A<<7))&255; return;
-    case 0x17: { const c=cpu.CY; cpu.CY=(cpu.A>>7)&1; cpu.A=((cpu.A<<1)|c)&255; return; }
-    case 0x1F: { const c=cpu.CY; cpu.CY=cpu.A&1; cpu.A=((cpu.A>>1)|(c<<7))&255; return; }
-    case 0x27: { // DAA (simplified)
-      let correction=0, carry=cpu.CY;
-      if((cpu.A&15)>9 || cpu.AC) correction|=6;
-      if(cpu.A>0x99 || cpu.CY) { correction|=0x60; carry=1; }
-      const old=cpu.A; cpu.A=(cpu.A+correction)&255;
-      cpu.CY=carry; cpu.AC=((old&15)+(correction&15))>15?1:0;
-      setSZP(cpu.A); return;
+    case 0x07: cpu.CY = (cpu.A >> 7) & 1; cpu.A = ((cpu.A << 1) | (cpu.A >> 7)) & 255; return;
+    case 0x0F: cpu.CY = cpu.A & 1; cpu.A = ((cpu.A >> 1) | (cpu.A << 7)) & 255; return;
+    case 0x17: {
+      const c = cpu.CY;
+      cpu.CY = (cpu.A >> 7) & 1;
+      cpu.A = ((cpu.A << 1) | c) & 255;
+      return;
     }
-    case 0x2F: cpu.A=(~cpu.A)&255; return;
-    case 0x37: cpu.CY=1; return;
-    case 0x3F: cpu.CY=cpu.CY?0:1; return;
-    case 0xF3: return; // DI: no interrupt model
-    case 0xFB: return; // EI: no interrupt model
+    case 0x1F: {
+      const c = cpu.CY;
+      cpu.CY = cpu.A & 1;
+      cpu.A = ((cpu.A >> 1) | (c << 7)) & 255;
+      return;
+    }
+    case 0x27: {
+      let correction = 0, carry = cpu.CY;
+      if ((cpu.A & 15) > 9 || cpu.AC) correction |= 6;
+      if (cpu.A > 0x99 || cpu.CY) { correction |= 0x60; carry = 1; }
+      const old = cpu.A;
+      cpu.A = (cpu.A + correction) & 255;
+      cpu.CY = carry;
+      cpu.AC = ((old & 15) + (correction & 15)) > 15 ? 1 : 0;
+      setSZP(cpu.A);
+      return;
+    }
+    case 0x2F: cpu.A = (~cpu.A) & 255; return;
+    case 0x37: cpu.CY = 1; return;
+    case 0x3F: cpu.CY = cpu.CY ? 0 : 1; return;
+    case 0xF3: return;
+    case 0xFB: return;
   }
-  // Conditional returns
+
   if ((op & 0xC7) === 0xC0) {
-    if(condition((op>>3)&7)) {
-      const lo=memory[cpu.SP]; cpu.SP=(cpu.SP+1)&65535;
-      const hi=memory[cpu.SP]; cpu.SP=(cpu.SP+1)&65535;
-      cpu.PC=(hi<<8)|lo;
+    if (condition((op >> 3) & 7)) {
+      const lo = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      const hi = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      cpu.PC = (hi << 8) | lo;
     }
     return;
   }
-  // Conditional jumps
   if ((op & 0xC7) === 0xC2) {
-    const a=fetch16();
-    if(condition((op>>3)&7)) cpu.PC=a;
+    const a = fetch16();
+    if (condition((op >> 3) & 7)) cpu.PC = a;
     return;
   }
-  // Conditional calls
   if ((op & 0xC7) === 0xC4) {
-    const a=fetch16();
-    if(condition((op>>3)&7)) {
-      cpu.SP=(cpu.SP-1)&65535; memory[cpu.SP]=(cpu.PC>>8)&255;
-      cpu.SP=(cpu.SP-1)&65535; memory[cpu.SP]=cpu.PC&255;
-      cpu.PC=a;
+    const a = fetch16();
+    if (condition((op >> 3) & 7)) {
+      cpu.SP = (cpu.SP - 1) & 65535;
+      memory[cpu.SP] = (cpu.PC >> 8) & 255;
+      cpu.SP = (cpu.SP - 1) & 65535;
+      memory[cpu.SP] = cpu.PC & 255;
+      cpu.PC = a;
     }
     return;
   }
+
   throw new Error("Unsupported opcode " + hex(op));
 }
 
@@ -689,8 +784,9 @@ $("prev").addEventListener("click", prev);
 $("go").addEventListener("click", go);
 $("exec").addEventListener("click", execProgram);
 $("examReg").addEventListener("click", () => {
+  buffer = "";
   setMode("reg");
-  setMessage("REGISTERS SHOWN BELOW");
+  setMessage("REGISTER VALUES SHOWN BELOW");
   render();
 });
 
