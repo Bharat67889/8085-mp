@@ -259,9 +259,9 @@ button:focus-visible {
   </div>
 
   <div class="help">
-    <b>Memory:</b> EXAM MEM → enter 4-digit address → NEXT.
+    <b>Memory:</b> EXAM MEM → enter address → NEXT.
     Enter a 2-digit byte → NEXT to store and advance.
-    PREV moves to the previous address.<br>
+    NEXT/PREV also work without entering data.<br>
     <b>Execute:</b> GO → enter start address → EXEC.
     The program runs until HLT or the instruction limit.<br>
     <b>Example:</b> At address 2000, store <code>3E</code>,
@@ -278,6 +278,7 @@ button:focus-visible {
 "use strict";
 
 const memory = new Uint8Array(65536);
+
 const cpu = {
   A:0, B:0, C:0, D:0, E:0, H:0, L:0,
   PC:0, SP:0xFFFF,
@@ -291,21 +292,25 @@ let pendingData = false;
 let halted = false;
 
 const $ = id => document.getElementById(id);
+
 const hex = (n, width=2) =>
   (n >>> 0).toString(16).toUpperCase().padStart(width, "0").slice(-width);
 
 function setMessage(message) {
   $("message").textContent = message;
 }
+
 function setMode(name) {
   mode = name;
   $("mode").textContent = "MODE: " + name.toUpperCase();
 }
+
 function render() {
   $("address").textContent = hex(address, 4);
   $("data").textContent = hex(memory[address], 2);
+
   $("registers").textContent =
-    `A  ${hex(cpu.A)}   F  ${flagsByte().toString(16).toUpperCase().padStart(2,"0")}
+`A  ${hex(cpu.A)}   F  ${hex(flagsByte())}
 B  ${hex(cpu.B)}   C  ${hex(cpu.C)}
 D  ${hex(cpu.D)}   E  ${hex(cpu.E)}
 H  ${hex(cpu.H)}   L  ${hex(cpu.L)}
@@ -314,29 +319,40 @@ SP ${hex(cpu.SP,4)}
 S:${cpu.S} Z:${cpu.Z} AC:${cpu.AC}
 P:${cpu.P} CY:${cpu.CY}`;
 }
+
 function flagsByte() {
-  return (cpu.S << 7) | (cpu.Z << 6) | (cpu.AC << 4) |
-         (cpu.P << 2) | 2 | cpu.CY;
+  return (cpu.S << 7) | (cpu.Z << 6) |
+         (cpu.AC << 4) | (cpu.P << 2) | 2 | cpu.CY;
 }
+
 function log(message) {
   const el = $("log");
   el.textContent = (message + "\n" + el.textContent).slice(0, 1800);
 }
+
 function reset() {
   Object.keys(cpu).forEach(k => cpu[k] = 0);
   cpu.SP = 0xFFFF;
+
   address = 0;
   buffer = "";
   pendingData = false;
   halted = false;
+
   setMode("ready");
   setMessage("READY");
   render();
   log("CPU reset. RAM preserved.");
 }
 
-/* CLEAR now clears only the unfinished input.
-   Already stored memory bytes are not erased. */
+/*
+  INPUT RULES:
+  - Data input always starts fresh when no digits are pending.
+  - After two digits, the next digit starts a new byte.
+  - NEXT/PREV never require data.
+  - Only a complete two-digit byte is committed.
+*/
+
 function clearBuffer() {
   buffer = "";
   pendingData = false;
@@ -348,14 +364,14 @@ function clearBuffer() {
     $("data").textContent = "--";
     setMessage("DATA INPUT CLEARED");
   } else {
-    setMessage("INPUT CLEARED");
     render();
+    setMessage("INPUT CLEARED");
   }
 }
 
-/* Entering more digits after a full field starts
-   a fresh input, so the address/data is editable. */
 function enterHex(digit) {
+  digit = String(digit).toUpperCase();
+
   if (mode === "addr" || mode === "goaddr") {
     if (buffer.length >= 4) {
       buffer = "";
@@ -367,7 +383,13 @@ function enterHex(digit) {
     return;
   }
 
-  if (mode === "mem" || mode === "data") {
+  if (mode === "mem") {
+    // No pending digits means this is a brand-new byte.
+    if (!pendingData) {
+      buffer = "";
+    }
+
+    // A third digit starts another byte.
     if (buffer.length >= 2) {
       buffer = "";
       pendingData = false;
@@ -375,6 +397,7 @@ function enterHex(digit) {
 
     buffer += digit;
     pendingData = true;
+
     $("data").textContent = buffer.padStart(2, "0");
     setMessage("DATA INPUT: " + buffer);
     return;
@@ -386,55 +409,52 @@ function enterHex(digit) {
 function examMemory() {
   buffer = "";
   pendingData = false;
+
   setMode("addr");
   $("address").textContent = "----";
   $("data").textContent = "--";
-  setMessage("ENTER 4-DIGIT ADDRESS");
+  setMessage("ENTER MEMORY ADDRESS");
 }
 
 function next() {
+  // Finish address entry. Partial addresses are accepted too.
   if (mode === "addr") {
-    if (buffer.length !== 4) {
-      setMessage("ENTER ALL 4 ADDRESS DIGITS");
-      return;
+    if (buffer.length > 0) {
+      address = parseInt(buffer, 16) & 0xFFFF;
     }
 
-    address = parseInt(buffer, 16) & 0xFFFF;
     buffer = "";
     pendingData = false;
     setMode("mem");
     render();
-    setMessage("MEMORY EXAMINE - ENTER BYTE");
+    setMessage("MEMORY " + hex(address, 4));
     return;
   }
 
   if (mode === "mem") {
-    if (!pendingData || buffer.length !== 2) {
-      setMessage("ENTER BOTH DATA DIGITS FIRST");
-      return;
+    // Save only if two digits were entered.
+    if (pendingData && buffer.length === 2) {
+      memory[address] = parseInt(buffer, 16) & 0xFF;
+      log(hex(address, 4) + " <- " + hex(memory[address]));
+    } else if (pendingData && buffer.length === 1) {
+      // A single digit is interpreted as the low nibble.
+      memory[address] = parseInt(buffer, 16) & 0x0F;
+      log(hex(address, 4) + " <- " + hex(memory[address]));
     }
 
-    memory[address] = parseInt(buffer, 16) & 0xFF;
-    log(hex(address, 4) + " <- " + hex(memory[address]));
-
-    address = (address + 1) & 0xFFFF;
     buffer = "";
     pendingData = false;
+
+    // NEXT always advances, even if no data was entered.
+    address = (address + 1) & 0xFFFF;
+
     render();
-    setMessage("BYTE STORED • NEXT ADDRESS");
+    setMessage("MEMORY " + hex(address, 4));
     return;
   }
 
   if (mode === "reg") {
-    const names = ["A","B","C","D","E","H","L","SP","PC"];
-    const i = names.indexOf(buffer);
-
-    if (i >= 0) {
-      setMessage(names[i] + " = " +
-        hex(cpu[names[i]], names[i].length === 1 ? 2 : 4));
-    } else {
-      setMessage("REGISTER VALUES SHOWN BELOW");
-    }
+    setMessage("REGISTER VALUES SHOWN BELOW");
     return;
   }
 
@@ -443,35 +463,48 @@ function next() {
 
 function prev() {
   if (mode === "mem") {
-    address = (address - 1) & 0xFFFF;
+    // Save a pending byte before navigating, if complete.
+    if (pendingData && buffer.length === 2) {
+      memory[address] = parseInt(buffer, 16) & 0xFF;
+      log(hex(address, 4) + " <- " + hex(memory[address]));
+    } else if (pendingData && buffer.length === 1) {
+      memory[address] = parseInt(buffer, 16) & 0x0F;
+      log(hex(address, 4) + " <- " + hex(memory[address]));
+    }
+
     buffer = "";
     pendingData = false;
+
+    // PREV always moves backward.
+    address = (address - 1 + 0x10000) & 0xFFFF;
+
     render();
-    setMessage("PREVIOUS ADDRESS - ENTER BYTE TO EDIT");
-  } else {
-    setMessage("PREV WORKS IN MEMORY MODE");
+    setMessage("MEMORY " + hex(address, 4));
+    return;
   }
+
+  setMessage("PRESS EXAM MEM FIRST");
 }
 
 function go() {
   buffer = "";
   pendingData = false;
   halted = false;
+
   setMode("goaddr");
   $("address").textContent = "----";
-  setMessage("ENTER 4-DIGIT START ADDRESS");
+  setMessage("ENTER START ADDRESS");
 }
 
 function execProgram() {
   if (mode === "goaddr") {
-    if (buffer.length !== 4) {
-      setMessage("ENTER ALL 4 ADDRESS DIGITS");
-      return;
+    if (buffer.length > 0) {
+      cpu.PC = parseInt(buffer, 16) & 0xFFFF;
     }
 
-    cpu.PC = parseInt(buffer, 16) & 0xFFFF;
-    address = cpu.PC;
     buffer = "";
+    pendingData = false;
+    address = cpu.PC;
     setMode("execute");
   } else if (mode !== "execute") {
     setMessage("PRESS GO FIRST");
@@ -510,23 +543,29 @@ function fetch8() {
   cpu.PC = (cpu.PC + 1) & 0xFFFF;
   return v;
 }
+
 function fetch16() {
-  const lo = fetch8(), hi = fetch8();
+  const lo = fetch8();
+  const hi = fetch8();
   return (hi << 8) | lo;
 }
+
 function getPair(p) {
   if (p === 0) return (cpu.B << 8) | cpu.C;
   if (p === 1) return (cpu.D << 8) | cpu.E;
   if (p === 2) return (cpu.H << 8) | cpu.L;
   return cpu.SP;
 }
+
 function setPair(p, v) {
   v &= 0xFFFF;
+
   if (p === 0) { cpu.B = v >> 8; cpu.C = v & 255; }
   else if (p === 1) { cpu.D = v >> 8; cpu.E = v & 255; }
   else if (p === 2) { cpu.H = v >> 8; cpu.L = v & 255; }
   else cpu.SP = v;
 }
+
 function getReg(r) {
   switch (r) {
     case 0: return cpu.B;
@@ -539,8 +578,10 @@ function getReg(r) {
     default: return cpu.A;
   }
 }
+
 function setReg(r, v) {
   v &= 255;
+
   switch (r) {
     case 0: cpu.B = v; break;
     case 1: cpu.C = v; break;
@@ -552,31 +593,40 @@ function setReg(r, v) {
     default: cpu.A = v;
   }
 }
+
 function parity(v) {
   let bits = 0;
   for (let i = 0; i < 8; i++) bits += (v >> i) & 1;
   return bits % 2 === 0 ? 1 : 0;
 }
+
 function setSZP(v) {
   v &= 255;
   cpu.S = (v >> 7) & 1;
   cpu.Z = v === 0 ? 1 : 0;
   cpu.P = parity(v);
 }
+
 function add(value, carry = 0) {
-  const a = cpu.A, result = a + value + carry;
+  const a = cpu.A;
+  const result = a + value + carry;
+
   cpu.A = result & 255;
   cpu.CY = result > 255 ? 1 : 0;
   cpu.AC = ((a & 15) + (value & 15) + carry) > 15 ? 1 : 0;
   setSZP(cpu.A);
 }
+
 function sub(value, borrow = 0) {
-  const a = cpu.A, result = a - value - borrow;
+  const a = cpu.A;
+  const result = a - value - borrow;
+
   cpu.A = result & 255;
   cpu.CY = result < 0 ? 1 : 0;
   cpu.AC = ((a & 15) - (value & 15) - borrow) < 0 ? 1 : 0;
   setSZP(cpu.A);
 }
+
 function condition(code) {
   switch (code) {
     case 0: return cpu.Z === 0;
@@ -592,42 +642,58 @@ function condition(code) {
 
 function execute(op) {
   if (op >= 0x40 && op <= 0x7F) {
-    if (op === 0x76) { halted = true; return; }
+    if (op === 0x76) {
+      halted = true;
+      return;
+    }
+
     setReg((op >> 3) & 7, getReg(op & 7));
     return;
   }
+
   if (op >= 0x80 && op <= 0x87) { add(getReg(op & 7)); return; }
   if (op >= 0x88 && op <= 0x8F) { add(getReg(op & 7), cpu.CY); return; }
   if (op >= 0x90 && op <= 0x97) { sub(getReg(op & 7)); return; }
   if (op >= 0x98 && op <= 0x9F) { sub(getReg(op & 7), cpu.CY); return; }
 
   if ((op & 0xC7) === 0x04) {
-    const r = (op >> 3) & 7, old = getReg(r), v = (old + 1) & 255;
+    const r = (op >> 3) & 7;
+    const old = getReg(r);
+    const v = (old + 1) & 255;
+
     setReg(r, v);
     cpu.AC = (old & 15) === 15 ? 1 : 0;
     setSZP(v);
     return;
   }
+
   if ((op & 0xC7) === 0x05) {
-    const r = (op >> 3) & 7, old = getReg(r), v = (old - 1) & 255;
+    const r = (op >> 3) & 7;
+    const old = getReg(r);
+    const v = (old - 1) & 255;
+
     setReg(r, v);
     cpu.AC = (old & 15) === 0 ? 1 : 0;
     setSZP(v);
     return;
   }
+
   if ((op & 0xC7) === 0x06) {
     setReg((op >> 3) & 7, fetch8());
     return;
   }
+
   if ((op & 0xCF) === 0x01) {
     setPair((op >> 4) & 3, fetch16());
     return;
   }
+
   if ((op & 0xCF) === 0x03) {
     const p = (op >> 4) & 3;
     setPair(p, getPair(p) + 1);
     return;
   }
+
   if ((op & 0xCF) === 0x0B) {
     const p = (op >> 4) & 3;
     setPair(p, getPair(p) - 1);
@@ -640,21 +706,25 @@ function execute(op) {
     case 0x12: memory[getPair(1)] = cpu.A; return;
     case 0x0A: cpu.A = memory[getPair(0)]; return;
     case 0x1A: cpu.A = memory[getPair(1)]; return;
+
     case 0x22: {
       const a = fetch16();
       memory[a] = cpu.L;
       memory[(a + 1) & 65535] = cpu.H;
       return;
     }
+
     case 0x2A: {
       const a = fetch16();
       cpu.L = memory[a];
       cpu.H = memory[(a + 1) & 65535];
       return;
     }
+
     case 0x32: memory[fetch16()] = cpu.A; return;
     case 0x3A: cpu.A = memory[fetch16()]; return;
     case 0xC3: cpu.PC = fetch16(); return;
+
     case 0xCD: {
       const a = fetch16();
       cpu.SP = (cpu.SP - 1) & 65535;
@@ -664,41 +734,81 @@ function execute(op) {
       cpu.PC = a;
       return;
     }
+
     case 0xC9: {
-      const lo = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
-      const hi = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      const lo = memory[cpu.SP];
+      cpu.SP = (cpu.SP + 1) & 65535;
+      const hi = memory[cpu.SP];
+      cpu.SP = (cpu.SP + 1) & 65535;
       cpu.PC = (hi << 8) | lo;
       return;
     }
+
     case 0xC6: add(fetch8()); return;
     case 0xCE: add(fetch8(), cpu.CY); return;
     case 0xD6: sub(fetch8()); return;
     case 0xDE: sub(fetch8(), cpu.CY); return;
-    case 0xE6: cpu.A &= fetch8(); cpu.CY = 0; cpu.AC = 1; setSZP(cpu.A); return;
-    case 0xEE: cpu.A ^= fetch8(); cpu.CY = 0; cpu.AC = 0; setSZP(cpu.A); return;
-    case 0xF6: cpu.A |= fetch8(); cpu.CY = 0; cpu.AC = 0; setSZP(cpu.A); return;
+
+    case 0xE6:
+      cpu.A &= fetch8();
+      cpu.CY = 0;
+      cpu.AC = 1;
+      setSZP(cpu.A);
+      return;
+
+    case 0xEE:
+      cpu.A ^= fetch8();
+      cpu.CY = 0;
+      cpu.AC = 0;
+      setSZP(cpu.A);
+      return;
+
+    case 0xF6:
+      cpu.A |= fetch8();
+      cpu.CY = 0;
+      cpu.AC = 0;
+      setSZP(cpu.A);
+      return;
+
     case 0xFE: {
-      const v = fetch8(), a = cpu.A, r = (a - v) & 255;
+      const v = fetch8();
+      const a = cpu.A;
+      const r = (a - v) & 255;
+
       cpu.CY = a < v ? 1 : 0;
       cpu.AC = (a & 15) < (v & 15) ? 1 : 0;
       setSZP(r);
       return;
     }
-    case 0xAF: cpu.A = 0; cpu.CY = 0; cpu.AC = 0; setSZP(cpu.A); return;
+
+    case 0xAF:
+      cpu.A = 0;
+      cpu.CY = 0;
+      cpu.AC = 0;
+      setSZP(cpu.A);
+      return;
+
     case 0xC5: case 0xD5: case 0xE5: case 0xF5: {
       const p = (op >> 4) & 3;
-      const val = p === 3 ? ((cpu.A << 8) | flagsByte()) : getPair(p);
+      const val = p === 3
+        ? ((cpu.A << 8) | flagsByte())
+        : getPair(p);
+
       cpu.SP = (cpu.SP - 1) & 65535;
       memory[cpu.SP] = (val >> 8) & 255;
       cpu.SP = (cpu.SP - 1) & 65535;
       memory[cpu.SP] = val & 255;
       return;
     }
+
     case 0xC1: case 0xD1: case 0xE1: case 0xF1: {
       const p = (op >> 4) & 3;
-      const lo = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
-      const hi = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      const lo = memory[cpu.SP];
+      cpu.SP = (cpu.SP + 1) & 65535;
+      const hi = memory[cpu.SP];
+      cpu.SP = (cpu.SP + 1) & 65535;
       const val = (hi << 8) | lo;
+
       if (p === 3) {
         cpu.A = hi;
         const f = lo;
@@ -712,24 +822,41 @@ function execute(op) {
       }
       return;
     }
-    case 0x07: cpu.CY = (cpu.A >> 7) & 1; cpu.A = ((cpu.A << 1) | (cpu.A >> 7)) & 255; return;
-    case 0x0F: cpu.CY = cpu.A & 1; cpu.A = ((cpu.A >> 1) | (cpu.A << 7)) & 255; return;
+
+    case 0x07:
+      cpu.CY = (cpu.A >> 7) & 1;
+      cpu.A = ((cpu.A << 1) | (cpu.A >> 7)) & 255;
+      return;
+
+    case 0x0F:
+      cpu.CY = cpu.A & 1;
+      cpu.A = ((cpu.A >> 1) | (cpu.A << 7)) & 255;
+      return;
+
     case 0x17: {
       const c = cpu.CY;
       cpu.CY = (cpu.A >> 7) & 1;
       cpu.A = ((cpu.A << 1) | c) & 255;
       return;
     }
+
     case 0x1F: {
       const c = cpu.CY;
       cpu.CY = cpu.A & 1;
       cpu.A = ((cpu.A >> 1) | (c << 7)) & 255;
       return;
     }
+
     case 0x27: {
-      let correction = 0, carry = cpu.CY;
+      let correction = 0;
+      let carry = cpu.CY;
+
       if ((cpu.A & 15) > 9 || cpu.AC) correction |= 6;
-      if (cpu.A > 0x99 || cpu.CY) { correction |= 0x60; carry = 1; }
+      if (cpu.A > 0x99 || cpu.CY) {
+        correction |= 0x60;
+        carry = 1;
+      }
+
       const old = cpu.A;
       cpu.A = (cpu.A + correction) & 255;
       cpu.CY = carry;
@@ -737,6 +864,7 @@ function execute(op) {
       setSZP(cpu.A);
       return;
     }
+
     case 0x2F: cpu.A = (~cpu.A) & 255; return;
     case 0x37: cpu.CY = 1; return;
     case 0x3F: cpu.CY = cpu.CY ? 0 : 1; return;
@@ -746,19 +874,24 @@ function execute(op) {
 
   if ((op & 0xC7) === 0xC0) {
     if (condition((op >> 3) & 7)) {
-      const lo = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
-      const hi = memory[cpu.SP]; cpu.SP = (cpu.SP + 1) & 65535;
+      const lo = memory[cpu.SP];
+      cpu.SP = (cpu.SP + 1) & 65535;
+      const hi = memory[cpu.SP];
+      cpu.SP = (cpu.SP + 1) & 65535;
       cpu.PC = (hi << 8) | lo;
     }
     return;
   }
+
   if ((op & 0xC7) === 0xC2) {
     const a = fetch16();
     if (condition((op >> 3) & 7)) cpu.PC = a;
     return;
   }
+
   if ((op & 0xC7) === 0xC4) {
     const a = fetch16();
+
     if (condition((op >> 3) & 7)) {
       cpu.SP = (cpu.SP - 1) & 65535;
       memory[cpu.SP] = (cpu.PC >> 8) & 255;
@@ -776,6 +909,7 @@ $("hexpad").addEventListener("click", e => {
   const btn = e.target.closest("[data-hex]");
   if (btn) enterHex(btn.dataset.hex);
 });
+
 $("reset").addEventListener("click", reset);
 $("clear").addEventListener("click", clearBuffer);
 $("examMem").addEventListener("click", examMemory);
@@ -783,8 +917,10 @@ $("next").addEventListener("click", next);
 $("prev").addEventListener("click", prev);
 $("go").addEventListener("click", go);
 $("exec").addEventListener("click", execProgram);
+
 $("examReg").addEventListener("click", () => {
   buffer = "";
+  pendingData = false;
   setMode("reg");
   setMessage("REGISTER VALUES SHOWN BELOW");
   render();
